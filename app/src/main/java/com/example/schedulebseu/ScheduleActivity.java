@@ -1,6 +1,9 @@
 package com.example.schedulebseu;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -31,14 +35,15 @@ public class ScheduleActivity extends AppCompatActivity {
 
     Schedule mSchedule;
     Calendar mCalendar = new GregorianCalendar();
-    int currentWeer;
 
     private List<String> weeks = new LinkedList<>();
     ArrayAdapter<String> weeksA;
     Spinner weeksS;
 
-    List<String> days;
+    daysContainer vies = new daysContainer();
 
+    RecyclerView mRecyclerView;
+    subjectAdapter mSubjectAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,8 +70,8 @@ public class ScheduleActivity extends AppCompatActivity {
         weeksA.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         weeksS.setAdapter(weeksA);
         weeksS.setSelection(mCalendar.get(Calendar.WEEK_OF_YEAR) - mSchedule.startWeek - 1);
-        currentWeer = mCalendar.get(Calendar.WEEK_OF_YEAR) - mSchedule.startWeek - 1;
-
+        vies.init();
+        vies.vies[new GregorianCalendar().get(Calendar.DAY_OF_WEEK) - 2].callOnClick();
         weeksS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -74,38 +79,130 @@ public class ScheduleActivity extends AppCompatActivity {
                 testC.add(Calendar.WEEK_OF_YEAR, -1 * mSchedule.startWeek);
                 testC.add(Calendar.WEEK_OF_YEAR, position + 2);
                 testC.add(Calendar.DAY_OF_MONTH, -1 * mCalendar.get(Calendar.DAY_OF_WEEK) + 2);
-                ((TextView) findViewById(R.id.pnDate)).setText(String.valueOf(testC.get(Calendar.DAY_OF_MONTH)));
-                testC.add(Calendar.DAY_OF_MONTH,1);
-                ((TextView) findViewById(R.id.vtDate)).setText(String.valueOf(testC.get(Calendar.DAY_OF_MONTH)));
-                testC.add(Calendar.DAY_OF_MONTH,1);
-                ((TextView) findViewById(R.id.srDay)).setText(String.valueOf(testC.get(Calendar.DAY_OF_MONTH)));
-                testC.add(Calendar.DAY_OF_MONTH,1);
-                ((TextView) findViewById(R.id.chDay)).setText(String.valueOf(testC.get(Calendar.DAY_OF_MONTH)));
-                testC.add(Calendar.DAY_OF_MONTH,1);
-                ((TextView) findViewById(R.id.ptDay)).setText(String.valueOf(testC.get(Calendar.DAY_OF_MONTH)));
-                testC.add(Calendar.DAY_OF_MONTH,1);
-                ((TextView) findViewById(R.id.sbDay)).setText(String.valueOf(testC.get(Calendar.DAY_OF_MONTH)));
+                for (int i = 0; i < 6; i++) {
+                    vies.viesDate[i].setText(String.valueOf(testC.get(Calendar.DAY_OF_MONTH)));
+                    testC.add(Calendar.DAY_OF_WEEK, 1);
+                }
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
-
-
-        LinearLayout first = findViewById(R.id.pn);
-        first.setOnClickListener(e->{
-            first.setBackgroundColor(Color.RED);
+        recycleViewInit();
+        ((Button) findViewById(R.id.dec)).setOnClickListener(e -> {
+            vies.dec();
+        });
+        ((Button) findViewById(R.id.inc)).setOnClickListener(e -> {
+            vies.inc();
         });
     }
 
-    private void clear(){
-        ((LinearLayout)findViewById(R.id.pn)).setBackgroundColor(Color.WHITE);
-        ((LinearLayout)findViewById(R.id.vt)).setBackgroundColor(Color.WHITE);
-        ((LinearLayout)findViewById(R.id.sr)).setBackgroundColor(Color.WHITE);
-        ((LinearLayout)findViewById(R.id.ch)).setBackgroundColor(Color.WHITE);
-        ((LinearLayout)findViewById(R.id.pt)).setBackgroundColor(Color.WHITE);
-        ((LinearLayout)findViewById(R.id.sb)).setBackgroundColor(Color.WHITE);
+    private void recycleViewInit() {
+        mRecyclerView = findViewById(R.id.recyclerView);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(ScheduleActivity.this));
+        mSubjectAdapter = new subjectAdapter(mSchedule.weeks.get(weeksS.getSelectedItemPosition()).days.get(vies.chosen).subjects);
+        mRecyclerView.setAdapter(mSubjectAdapter);
+    }
+
+    private class daysContainer {
+        private int chosen;
+        public LinearLayout[] vies = new LinearLayout[6];
+        public TextView[] viesDate = new TextView[6];
+
+        public void clear() {
+            for (int i = 0; i < 6; i++)
+                vies[i].setBackgroundColor(Color.WHITE);
+        }
+
+        public int getPosSelected() {
+            return chosen;
+        }
+
+        public void dec() {
+            if (chosen == 0) {
+                chosen = 5;
+                weeksDec();
+            } else chosen = chosen - 1;
+            vies[chosen].callOnClick();
+        }
+
+        public void inc() {
+            if (chosen == 5) {
+                chosen = 0;
+                weeksInc();
+            } else chosen = chosen + 1;
+            vies[chosen].callOnClick();
+        }
+
+        public void init() {
+            vies[0] = findViewById(R.id.pn);
+            vies[1] = findViewById(R.id.vt);
+            vies[2] = findViewById(R.id.sr);
+            vies[3] = findViewById(R.id.ch);
+            vies[4] = findViewById(R.id.pt);
+            vies[5] = findViewById(R.id.sb);
+            viesDate[0] = findViewById(R.id.pnDate);
+            viesDate[1] = findViewById(R.id.vtDate);
+            viesDate[2] = findViewById(R.id.srDay);
+            viesDate[3] = findViewById(R.id.chDay);
+            viesDate[4] = findViewById(R.id.ptDay);
+            viesDate[5] = findViewById(R.id.sbDay);
+
+            for (int i = 0; i < 6; i++) {
+                LinearLayout test = vies[i];
+                int finalI = i;
+                test.setOnClickListener(e -> {
+                    chosen = finalI;
+                    clear();
+                    test.setBackgroundColor(Color.RED);
+                });
+            }
+
+        }
+    }
+
+    private void weeksDec() {
+        int pos = weeksS.getSelectedItemPosition();
+        if (pos != 0)
+            weeksS.setSelection(pos - 1);
+    }
+
+    private void weeksInc() {
+        int pos = weeksS.getSelectedItemPosition();
+        if (pos != mSchedule.weeksCount - 1)
+            weeksS.setSelection(pos + 1);
+    }
+
+    private class subjectHolder extends RecyclerView.ViewHolder {
+        public subjectHolder(LayoutInflater inflater, ViewGroup parent) {
+            super(inflater.inflate(R.layout.subject_layout, parent, false));
+        }
+    }
+
+    private class subjectAdapter extends RecyclerView.Adapter<subjectHolder> {
+        List<simpleSubject> mSubjects;
+
+        public subjectAdapter(List<simpleSubject> subjects) {
+            mSubjects = subjects;
+        }
+
+        @NonNull
+        @Override
+        public subjectHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            LayoutInflater layoutInflater = LayoutInflater.from(ScheduleActivity.this);
+            return new subjectHolder(layoutInflater, parent);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull subjectHolder holder, int position) {
+
+        }
+
+        @Override
+        public int getItemCount() {
+            return mSubjects.size();
+        }
     }
 
     /*class testAdapter extends BaseAdapter {
