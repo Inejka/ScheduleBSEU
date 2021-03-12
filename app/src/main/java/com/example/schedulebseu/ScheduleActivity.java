@@ -2,6 +2,8 @@ package com.example.schedulebseu;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -70,14 +72,16 @@ public class ScheduleActivity extends AppCompatActivity {
         weeksA.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         weeksS.setAdapter(weeksA);
         weeksS.setSelection(mCalendar.get(Calendar.WEEK_OF_YEAR) - mSchedule.startWeek - 1);
+        recycleViewInit();
         vies.init();
-        vies.vies[new GregorianCalendar().get(Calendar.DAY_OF_WEEK) - 2].callOnClick();
+        int startDay = new GregorianCalendar().get(Calendar.DAY_OF_WEEK) - 2;
+        vies.vies[(startDay == 7) ? 5 : (startDay - 2)].callOnClick();
         weeksS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Calendar testC = new GregorianCalendar();
                 testC.add(Calendar.WEEK_OF_YEAR, -1 * mSchedule.startWeek);
-                testC.add(Calendar.WEEK_OF_YEAR, position + 2);
+                testC.add(Calendar.WEEK_OF_YEAR, position + 1);
                 testC.add(Calendar.DAY_OF_MONTH, -1 * mCalendar.get(Calendar.DAY_OF_WEEK) + 2);
                 for (int i = 0; i < 6; i++) {
                     vies.viesDate[i].setText(String.valueOf(testC.get(Calendar.DAY_OF_MONTH)));
@@ -89,7 +93,7 @@ public class ScheduleActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-        recycleViewInit();
+
         ((Button) findViewById(R.id.dec)).setOnClickListener(e -> {
             vies.dec();
         });
@@ -101,7 +105,7 @@ public class ScheduleActivity extends AppCompatActivity {
     private void recycleViewInit() {
         mRecyclerView = findViewById(R.id.recyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(ScheduleActivity.this));
-        mSubjectAdapter = new subjectAdapter(mSchedule.weeks.get(weeksS.getSelectedItemPosition()).days.get(vies.chosen).subjects);
+        mSubjectAdapter = new subjectAdapter();
         mRecyclerView.setAdapter(mSubjectAdapter);
     }
 
@@ -156,6 +160,7 @@ public class ScheduleActivity extends AppCompatActivity {
                     chosen = finalI;
                     clear();
                     test.setBackgroundColor(Color.RED);
+                    mSubjectAdapter.updateSub(mSchedule.weeks.get(weeksS.getSelectedItemPosition()).days.get(chosen).subjects);
                 });
             }
 
@@ -175,16 +180,39 @@ public class ScheduleActivity extends AppCompatActivity {
     }
 
     private class subjectHolder extends RecyclerView.ViewHolder {
+        TextView time, nameAndType, lecturer, classroom, customInfo;
+
         public subjectHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.subject_layout, parent, false));
+            time = itemView.findViewById(R.id.time);
+            nameAndType = itemView.findViewById(R.id.nameAndType);
+            lecturer = itemView.findViewById(R.id.lecturer);
+            classroom = itemView.findViewById(R.id.classroom);
+            customInfo = itemView.findViewById(R.id.customInfo);
+        }
+
+        public void bind(simpleSubject subject) {
+            time.setText(subject.time);
+            nameAndType.setText(subject.subjectName + subject.type);
+            lecturer.setText(subject.lecturer);
+            classroom.setText(subject.classroom);
+            customInfo.setText(subject.customInfo);
         }
     }
 
     private class subjectAdapter extends RecyclerView.Adapter<subjectHolder> {
         List<simpleSubject> mSubjects;
 
+        public subjectAdapter() {
+        }
+
         public subjectAdapter(List<simpleSubject> subjects) {
             mSubjects = subjects;
+        }
+
+        public void updateSub(List<simpleSubject> subjects) {
+            mSubjects = subjects;
+            notifyDataSetChanged();
         }
 
         @NonNull
@@ -196,7 +224,7 @@ public class ScheduleActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull subjectHolder holder, int position) {
-
+            holder.bind(mSubjects.get(position));
         }
 
         @Override
