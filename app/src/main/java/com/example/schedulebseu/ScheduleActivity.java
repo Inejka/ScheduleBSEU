@@ -3,9 +3,13 @@ package com.example.schedulebseu;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Context;
 import android.content.Intent;
@@ -26,7 +30,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
@@ -42,10 +50,14 @@ public class ScheduleActivity extends AppCompatActivity {
     ArrayAdapter<String> weeksA;
     Spinner weeksS;
 
+    FragmentManager fragmentManager;
+
+    ViewPager viewPager;
+
     daysContainer vies = new daysContainer();
 
-    RecyclerView mRecyclerView;
-    subjectAdapter mSubjectAdapter;
+    boolean buttonClickes = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +73,6 @@ public class ScheduleActivity extends AppCompatActivity {
         else {
             init();
         }
-
     }
 
     private void init() {
@@ -72,10 +83,10 @@ public class ScheduleActivity extends AppCompatActivity {
         weeksA.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         weeksS.setAdapter(weeksA);
         weeksS.setSelection(mCalendar.get(Calendar.WEEK_OF_YEAR) - mSchedule.startWeek - 1);
-        recycleViewInit();
+        fragmentManager = getSupportFragmentManager();
+        viewPager = findViewById(R.id.pager);
         vies.init();
-        int startDay = new GregorianCalendar().get(Calendar.DAY_OF_WEEK) - 2;
-        vies.vies[(startDay == 7) ? 5 : (startDay - 2)].callOnClick();
+
         weeksS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -93,20 +104,31 @@ public class ScheduleActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+        viewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
+            int prevPos = 0;
 
-        ((Button) findViewById(R.id.dec)).setOnClickListener(e -> {
-            vies.dec();
-        });
-        ((Button) findViewById(R.id.inc)).setOnClickListener(e -> {
-            vies.inc();
-        });
-    }
+            @NonNull
+            @Override
+            public Fragment getItem(int position) {
+                if (!buttonClickes) {
+                    if ((prevPos > position)) {
+                        vies.dec();
+                    } else {
+                        vies.inc();
+                    }
+                } else buttonClickes = false;
+                prevPos = position;
+                return new RecycleViewFragment(mSchedule.get(position));
+            }
 
-    private void recycleViewInit() {
-        mRecyclerView = findViewById(R.id.recyclerView);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(ScheduleActivity.this));
-        mSubjectAdapter = new subjectAdapter();
-        mRecyclerView.setAdapter(mSubjectAdapter);
+            @Override
+            public int getCount() {
+                return mSchedule.weeksCount * 6;
+            }
+        });
+        int startDay = new GregorianCalendar().get(Calendar.DAY_OF_WEEK);
+        vies.vies[(startDay == 7) ? 5 : (startDay - 2)].callOnClick();
+
     }
 
     private class daysContainer {
@@ -128,7 +150,8 @@ public class ScheduleActivity extends AppCompatActivity {
                 chosen = 5;
                 weeksDec();
             } else chosen = chosen - 1;
-            vies[chosen].callOnClick();
+            clear();
+            vies[chosen].setBackgroundColor(Color.RED);
         }
 
         public void inc() {
@@ -136,7 +159,8 @@ public class ScheduleActivity extends AppCompatActivity {
                 chosen = 0;
                 weeksInc();
             } else chosen = chosen + 1;
-            vies[chosen].callOnClick();
+            clear();
+            vies[chosen].setBackgroundColor(Color.RED);
         }
 
         public void init() {
@@ -160,10 +184,36 @@ public class ScheduleActivity extends AppCompatActivity {
                     chosen = finalI;
                     clear();
                     test.setBackgroundColor(Color.RED);
-                    mSubjectAdapter.updateSub(mSchedule.weeks.get(weeksS.getSelectedItemPosition()).days.get(chosen).subjects);
+                    buttonClickes = true;
+                    viewPager.setCurrentItem(weeksS.getSelectedItemPosition() * 6 + chosen);
+                    //((RecycleViewFragment) recView).updateSub(mSchedule.weeks.get(weeksS.getSelectedItemPosition()).days.get(chosen).subjects);
                 });
             }
 
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FileOutputStream fos = null;
+        try {
+            fos = ScheduleActivity.this.openFileOutput("FILE_NAME", Context.MODE_PRIVATE);
+            ObjectOutputStream test = new ObjectOutputStream(fos);
+            test.writeObject(mSchedule);
+            test.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -179,119 +229,7 @@ public class ScheduleActivity extends AppCompatActivity {
             weeksS.setSelection(pos + 1);
     }
 
-    private class subjectHolder extends RecyclerView.ViewHolder {
-        TextView time, nameAndType, lecturer, classroom, customInfo;
 
-        public subjectHolder(LayoutInflater inflater, ViewGroup parent) {
-            super(inflater.inflate(R.layout.subject_layout, parent, false));
-            time = itemView.findViewById(R.id.time);
-            nameAndType = itemView.findViewById(R.id.nameAndType);
-            lecturer = itemView.findViewById(R.id.lecturer);
-            classroom = itemView.findViewById(R.id.classroom);
-            customInfo = itemView.findViewById(R.id.customInfo);
-        }
-
-        public void bind(simpleSubject subject) {
-            time.setText(subject.time);
-            nameAndType.setText(subject.subjectName + subject.type);
-            lecturer.setText(subject.lecturer);
-            classroom.setText(subject.classroom);
-            customInfo.setText(subject.customInfo);
-        }
-    }
-
-    private class subjectAdapter extends RecyclerView.Adapter<subjectHolder> {
-        List<simpleSubject> mSubjects;
-
-        public subjectAdapter() {
-        }
-
-        public subjectAdapter(List<simpleSubject> subjects) {
-            mSubjects = subjects;
-        }
-
-        public void updateSub(List<simpleSubject> subjects) {
-            mSubjects = subjects;
-            notifyDataSetChanged();
-        }
-
-        @NonNull
-        @Override
-        public subjectHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            LayoutInflater layoutInflater = LayoutInflater.from(ScheduleActivity.this);
-            return new subjectHolder(layoutInflater, parent);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull subjectHolder holder, int position) {
-            holder.bind(mSubjects.get(position));
-        }
-
-        @Override
-        public int getItemCount() {
-            return mSubjects.size();
-        }
-    }
-
-    /*class testAdapter extends BaseAdapter {
-        private Context mContext;
-        List<String> days;
-
-        public testAdapter(Context context, List<String> days) {
-            mContext = context;
-            this.days = days;
-        }
-
-        @Override
-        public int getCount() {
-            return 6;
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return days.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View test = convertView;
-            if (test == null) {
-                test = ((LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE))
-                        .inflate(R.layout.grid_item_layout, parent, false);
-            }
-            TextView dayWeek = test.findViewById(R.id.dayWeek);
-            TextView number = test.findViewById(R.id.number);
-            Log.i("Hah", String.valueOf(position));
-            switch (position) {
-                case 0:
-                    dayWeek.setText("ПН");
-                    break;
-                case 1:
-                    dayWeek.setText("ВТ");
-                    break;
-                case 2:
-                    dayWeek.setText("СР");
-                    break;
-                case 3:
-                    dayWeek.setText("ЧТ");
-                    break;
-                case 4:
-                    dayWeek.setText("ПТ");
-                    break;
-                case 5:
-                    dayWeek.setText("СБ");
-                    break;
-            }
-            //((TextView)test.findViewById(R.id.day)).setText(days.get(position));
-            return test;
-        }
-    }
-       */
     boolean isScheduleGenerated() {
         FileInputStream fis = null;
         try {

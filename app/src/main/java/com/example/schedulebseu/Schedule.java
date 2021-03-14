@@ -7,11 +7,13 @@ import java.util.List;
 
 public class Schedule implements Serializable {
     private static final long serialVersionUID = 1L;
+
     public class simpleDay implements Serializable {
         private static final long serialVersionUID = 2L;
         public List<simpleSubject> subjects;
-        public simpleDay(){
-            subjects= new LinkedList<>();
+
+        public simpleDay() {
+            subjects = new LinkedList<>();
         }
 
     }
@@ -20,9 +22,9 @@ public class Schedule implements Serializable {
         private static final long serialVersionUID = 3L;
         public List<simpleDay> days;
 
-        public Week(){
+        public Week() {
             days = new ArrayList<>();
-            for(int i = 0 ; i < 7 ; i++)
+            for (int i = 0; i < 7; i++)
                 days.add(new simpleDay());
         }
     }
@@ -36,5 +38,9 @@ public class Schedule implements Serializable {
         for (int i = 0; i < weeksCount; i++)
             weeks.add(new Week());
 
+    }
+
+    List<simpleSubject> get(int position) {
+        return weeks.get(position / 6).days.get(position % 6).subjects;
     }
 }
