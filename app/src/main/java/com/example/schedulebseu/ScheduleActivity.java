@@ -55,9 +55,7 @@ public class ScheduleActivity extends AppCompatActivity {
     ViewPager viewPager;
 
     daysContainer vies = new daysContainer();
-
-    boolean buttonClickes = false;
-
+    int buttonPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +95,7 @@ public class ScheduleActivity extends AppCompatActivity {
                 for (int i = 0; i < 6; i++) {
                     vies.viesDate[i].setText(String.valueOf(testC.get(Calendar.DAY_OF_MONTH)));
                     testC.add(Calendar.DAY_OF_WEEK, 1);
+                vies.click();
                 }
             }
 
@@ -104,20 +103,14 @@ public class ScheduleActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+
+        viewPager.addOnPageChangeListener(mOnPageChangeListener);
         viewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
-            int prevPos = 0;
 
             @NonNull
             @Override
             public Fragment getItem(int position) {
-                if (!buttonClickes) {
-                    if ((prevPos > position)) {
-                        vies.dec();
-                    } else {
-                        vies.inc();
-                    }
-                } else buttonClickes = false;
-                prevPos = position;
+
                 return new RecycleViewFragment(mSchedule.get(position));
             }
 
@@ -127,7 +120,8 @@ public class ScheduleActivity extends AppCompatActivity {
             }
         });
         int startDay = new GregorianCalendar().get(Calendar.DAY_OF_WEEK);
-        vies.vies[(startDay == 7) ? 5 : (startDay - 2)].callOnClick();
+        vies.vies[(startDay == 1) ? 5 : (startDay - 2)].callOnClick();
+
 
     }
 
@@ -152,6 +146,10 @@ public class ScheduleActivity extends AppCompatActivity {
             } else chosen = chosen - 1;
             clear();
             vies[chosen].setBackgroundColor(Color.RED);
+        }
+
+        public void click() {
+            vies[chosen].callOnClick();
         }
 
         public void inc() {
@@ -181,11 +179,13 @@ public class ScheduleActivity extends AppCompatActivity {
                 LinearLayout test = vies[i];
                 int finalI = i;
                 test.setOnClickListener(e -> {
+
                     chosen = finalI;
                     clear();
                     test.setBackgroundColor(Color.RED);
-                    buttonClickes = true;
-                    viewPager.setCurrentItem(weeksS.getSelectedItemPosition() * 6 + chosen);
+                    buttonPosition = weeksS.getSelectedItemPosition() * 6 + chosen;
+                    mOnPageChangeListener.prevPos = buttonPosition;
+                    viewPager.setCurrentItem(buttonPosition);
                     //((RecycleViewFragment) recView).updateSub(mSchedule.weeks.get(weeksS.getSelectedItemPosition()).days.get(chosen).subjects);
                 });
             }
@@ -243,4 +243,36 @@ public class ScheduleActivity extends AppCompatActivity {
         }
         return true;
     }
+
+    private class MyPageChangeListener implements ViewPager.OnPageChangeListener {
+
+        public int prevPos = 0;
+
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            if (positionOffsetPixels != 0) return;
+            if (prevPos == position) return;
+            if (Math.abs(prevPos - position) == 1) {
+                if ((prevPos > position)) {
+                    vies.dec();
+                } else {
+                    vies.inc();
+                }
+            }
+            prevPos = position;
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+
+        }
+    }
+
+
+
+    private MyPageChangeListener mOnPageChangeListener = new MyPageChangeListener();
 }
