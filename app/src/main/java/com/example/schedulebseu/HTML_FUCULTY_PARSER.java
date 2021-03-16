@@ -38,9 +38,9 @@ import retrofit2.http.Url;
 public class HTML_FUCULTY_PARSER {
     static public Map<String, String> mapFaculties;
     static public List<String> listFaculties;
-    static public ArrayAdapter<String> test;
+    static public SpinnerAdapter test;
 
-    public HTML_FUCULTY_PARSER(Map<String, String> mapFaculties, List<String> listFaculties, ArrayAdapter<String> test) {
+    public HTML_FUCULTY_PARSER(Map<String, String> mapFaculties, List<String> listFaculties, SpinnerAdapter test) {
         this.mapFaculties = mapFaculties;
         this.listFaculties = listFaculties;
         this.test = test;

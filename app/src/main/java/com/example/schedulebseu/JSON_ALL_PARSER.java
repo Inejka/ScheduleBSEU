@@ -37,9 +37,9 @@ public class JSON_ALL_PARSER {
 
     private Map<String, String> map;
     private List<String> list;
-    private ArrayAdapter<String> testA;
+    private SpinnerAdapter testA;
 
-    public JSON_ALL_PARSER(Map<String, String> map, List<String> list, ArrayAdapter<String> test) {
+    public JSON_ALL_PARSER(Map<String, String> map, List<String> list, SpinnerAdapter test) {
         this.list = list;
         this.map = map;
         this.testA = test;

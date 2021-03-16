@@ -1,58 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/sublay"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/sublay">
+    android:gravity="center"
+    android:layout_marginBottom="10dp"
+    android:background="@drawable/layout_bg">
 
     <TextView
         android:id="@+id/time"
-        android:gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:gravity="center"
         android:text="time"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:textColor="@color/textColor"
+        android:textSize="24sp"
+        />
 
     <TextView
         android:id="@+id/nameAndType"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
         android:gravity="center"
         android:text="nameAndType"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/time" />
+        android:textColor="@color/textColor"
+        android:textSize="18sp" />
 
     <TextView
         android:id="@+id/lecturer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:gravity="center"
         android:text="lecturer"
-        android:gravity="center"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/nameAndType" />
+        android:textColor="@color/textColor"
+        android:textSize="18sp"
+       />
 
-    <TextView
-        android:id="@+id/classroom"
-        android:layout_width="wrap_content"
-        android:gravity="center"
-        android:layout_height="wrap_content"
-        android:text="classroom"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lecturer" />
-
-    <TextView
-        android:id="@+id/customInfo"
-        android:layout_width="wrap_content"
-        android:gravity="center"
-        android:layout_height="wrap_content"
-        android:text="customInfo"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/classroom" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

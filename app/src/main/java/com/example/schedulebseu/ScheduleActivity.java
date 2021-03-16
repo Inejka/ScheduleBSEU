@@ -35,19 +35,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.Inflater;
 
-public class ScheduleActivity extends AppCompatActivity {
+import retrofit2.http.PUT;
 
+public class ScheduleActivity extends AppCompatActivity {
+    boolean initIsNeeded = true;
     Schedule mSchedule;
     Calendar mCalendar = new GregorianCalendar();
 
     private List<String> weeks = new LinkedList<>();
-    ArrayAdapter<String> weeksA;
+    SpinnerAdapter weeksA;
     Spinner weeksS;
 
     FragmentManager fragmentManager;
@@ -63,22 +66,25 @@ public class ScheduleActivity extends AppCompatActivity {
         setContentView(R.layout.activity_schedule);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+
+    protected void onResume() {
+        super.onResume();
         if (!isScheduleGenerated())
             startActivity(new Intent(ScheduleActivity.this, ScheduleChooseActivity.class));
-        else {
+        else if (initIsNeeded) {
             init();
         }
     }
 
+
     private void init() {
+        loadSchedule();
         for (int i = 0; i < mSchedule.weeks.size(); i++)
             weeks.add(String.valueOf(i + 1) + " неделя");
         weeksS = findViewById(R.id.spinner);
-        weeksA = new ArrayAdapter<String>(ScheduleActivity.this, android.R.layout.simple_spinner_item, weeks);
-        weeksA.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        weeksA = new SpinnerAdapter(ScheduleActivity.this, weeks);
+        //weeksA = new ArrayAdapter<String>(ScheduleActivity.this, android.R.layout.simple_spinner_item, weeks);
+        //weeksA.setDropDownViewResource(R.layout.spinner_item);
         weeksS.setAdapter(weeksA);
         weeksS.setSelection(mCalendar.get(Calendar.WEEK_OF_YEAR) - mSchedule.startWeek - 1);
         fragmentManager = getSupportFragmentManager();
@@ -95,7 +101,7 @@ public class ScheduleActivity extends AppCompatActivity {
                 for (int i = 0; i < 6; i++) {
                     vies.viesDate[i].setText(String.valueOf(testC.get(Calendar.DAY_OF_MONTH)));
                     testC.add(Calendar.DAY_OF_WEEK, 1);
-                vies.click();
+                    vies.click();
                 }
             }
 
@@ -110,29 +116,31 @@ public class ScheduleActivity extends AppCompatActivity {
             @NonNull
             @Override
             public Fragment getItem(int position) {
-
+                if (position == mSchedule.weeksCount * 6) {
+                    return new RecycleViewFragment(new ArrayList<>(100));
+                }
                 return new RecycleViewFragment(mSchedule.get(position));
             }
 
             @Override
             public int getCount() {
-                return mSchedule.weeksCount * 6;
+                return mSchedule.weeksCount * 6 + 1;
             }
         });
         int startDay = new GregorianCalendar().get(Calendar.DAY_OF_WEEK);
         vies.vies[(startDay == 1) ? 5 : (startDay - 2)].callOnClick();
-
-
+        initIsNeeded = false;
     }
 
     private class daysContainer {
+        public boolean buttonClicked;
         private int chosen;
         public LinearLayout[] vies = new LinearLayout[6];
         public TextView[] viesDate = new TextView[6];
 
         public void clear() {
             for (int i = 0; i < 6; i++)
-                vies[i].setBackgroundColor(Color.WHITE);
+                vies[i].setBackgroundResource(R.drawable.layout_bg);
         }
 
         public int getPosSelected() {
@@ -145,7 +153,7 @@ public class ScheduleActivity extends AppCompatActivity {
                 weeksDec();
             } else chosen = chosen - 1;
             clear();
-            vies[chosen].setBackgroundColor(Color.RED);
+            updateButtons();
         }
 
         public void click() {
@@ -158,7 +166,14 @@ public class ScheduleActivity extends AppCompatActivity {
                 weeksInc();
             } else chosen = chosen + 1;
             clear();
-            vies[chosen].setBackgroundColor(Color.RED);
+            updateButtons();
+        }
+
+        public void updateHat(int pos) {
+            chosen = pos % 6;
+            weeksS.setSelection(pos / 6);
+            clear();
+            updateButtons();
         }
 
         public void init() {
@@ -179,23 +194,27 @@ public class ScheduleActivity extends AppCompatActivity {
                 LinearLayout test = vies[i];
                 int finalI = i;
                 test.setOnClickListener(e -> {
-
+                    buttonClicked = true;
                     chosen = finalI;
                     clear();
-                    test.setBackgroundColor(Color.RED);
+                    updateButtons();
                     buttonPosition = weeksS.getSelectedItemPosition() * 6 + chosen;
                     mOnPageChangeListener.prevPos = buttonPosition;
                     viewPager.setCurrentItem(buttonPosition);
                     //((RecycleViewFragment) recView).updateSub(mSchedule.weeks.get(weeksS.getSelectedItemPosition()).days.get(chosen).subjects);
                 });
             }
+        }
 
+        public void updateButtons() {
+            vies[chosen].setBackgroundResource(R.drawable.layoyt_chosen_bg);
         }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        if (!isScheduleGenerated()) return;
         FileOutputStream fos = null;
         try {
             fos = ScheduleActivity.this.openFileOutput("FILE_NAME", Context.MODE_PRIVATE);
@@ -234,14 +253,23 @@ public class ScheduleActivity extends AppCompatActivity {
         FileInputStream fis = null;
         try {
             fis = openFileInput("FILE_NAME");
-            ObjectInputStream test = new ObjectInputStream(fis);
-            mSchedule = (Schedule) test.readObject();
-            test.close();
             fis.close();
         } catch (Exception e) {
             return false;
         }
         return true;
+    }
+
+    void loadSchedule() {
+        FileInputStream fis = null;
+        try {
+            fis = openFileInput("FILE_NAME");
+            ObjectInputStream test = new ObjectInputStream(fis);
+            mSchedule = (Schedule) test.readObject();
+            test.close();
+            fis.close();
+        } catch (Exception e) {
+        }
     }
 
     private class MyPageChangeListener implements ViewPager.OnPageChangeListener {
@@ -250,7 +278,11 @@ public class ScheduleActivity extends AppCompatActivity {
 
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            if (positionOffsetPixels != 0) return;
+            if (vies.buttonClicked && positionOffsetPixels != 0) {
+                return;
+            } else vies.buttonClicked = false;
+            vies.updateHat(position);
+            /*    if (positionOffsetPixels != 0) return;
             if (prevPos == position) return;
             if (Math.abs(prevPos - position) == 1) {
                 if ((prevPos > position)) {
@@ -259,6 +291,7 @@ public class ScheduleActivity extends AppCompatActivity {
                     vies.inc();
                 }
             }
+        */
             prevPos = position;
         }
 
@@ -271,7 +304,6 @@ public class ScheduleActivity extends AppCompatActivity {
 
         }
     }
-
 
 
     private MyPageChangeListener mOnPageChangeListener = new MyPageChangeListener();

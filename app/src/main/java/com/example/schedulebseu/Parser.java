@@ -24,6 +24,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Parser {
+    //ToDo нормальынй парсер
+
+
     Document toParse;
 
     public Parser(Document toParse) {
@@ -57,15 +60,25 @@ public class Parser {
                 continue;
             }
             if (hasSubgroups(toWorkWith)) {
-
+                List<Element> freaks = new LinkedList<>();
+                Element toWork = rowsITERATOR.next();
+                while (hasSubgroups(toWork)) {
+                    freaks.add(toWork);
+                    toWork = rowsITERATOR.next();
+                    if (!isSubject(toWork)) break;
+                }
+                addSubWithSubGroups(toSave, toWorkWith, freaks, day);
+                if (isSubject(toWork))
+                    addNormakSub(toSave, toWork, day);
             } else {
                 addNormakSub(toSave, toWorkWith, day);
             }
         }
-        save(toSave,context,fragment);
+        save(toSave, context, fragment);
     }
 
-    private void save(Schedule toSave,Context mcoContext,Fragment fragment) {
+
+    private void save(Schedule toSave, Context mcoContext, Fragment fragment) {
 
         FileOutputStream fos = null;
 
@@ -89,6 +102,22 @@ public class Parser {
                 }
             }
         }
+    }
+
+    private void addSubWithSubGroups(Schedule toSave, Element firstRow, List<Element> uhRow, int day) {
+        simpleSubject sub = new simpleSubject();
+        sub.time = firstRow.getElementsByTag("td").get(0).text();
+        sub.subjectName = firstRow.getElementsByTag("td").get(2).getAllElements().get(0).text();
+        simpleSubject firstPodgr = sub.copy(), secondPodgr = sub.copy();
+        for (Element j : uhRow) {
+            simpleSubject subT = sub.copy();
+            subT.lecturer = "(" + j.getElementsByTag("td").get(0).text() + ") " + j.getElementsByTag("td").get(1).text();
+            subT.classroom = j.getElementsByTag("td").get(2).text();
+            for (Integer i : getWeeksOfSubject(firstRow.getElementsByTag("td").get(1).text())) {
+                toSave.weeks.get(i - 1).days.get(day).subjects.add(subT.copy());
+            }
+        }
+
     }
 
     private void addNormakSub(Schedule toAdd, Element toParse, int day) {
@@ -116,13 +145,21 @@ public class Parser {
     }
 
     private boolean isSubject(Element toCheck) {
-        int test = 0;
-        for (Element i : toCheck.getElementsByTag("td"))
-            test++;
-        return test >= 2;
+        Elements i = toCheck.getElementsByTag("td");
+        if (i.size() <= 1) return false;
+        return isClassroom(i.get(2).text()) || isTime(i.get(0).text());
+    }
+
+    private boolean isClassroom(String str) {
+        if (str.length() == 0) return false;
+        for (int i = 0; i < str.length(); i++)
+            if (!((str.charAt(i) >= '0' &&
+                    str.charAt(i) <= '9') || str.charAt(i) == '/')) return false;
+        return true;
     }
 
     private boolean isTime(String str) {
+        if (str.length() == 0) return false;
         for (int i = 0; i < str.length(); i++)
             if (!(str.charAt(i) == ':' || str.charAt(i) == '-' || (str.charAt(i) >= '0' &&
                     str.charAt(i) <= '9') || str.charAt(i) == '(' || str.charAt(i) == ')'

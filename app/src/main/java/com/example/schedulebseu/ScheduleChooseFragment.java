@@ -29,17 +29,17 @@ public class ScheduleChooseFragment extends Fragment {
 
     private Map<String, String> mapForms = new LinkedHashMap<>();
     private List<String> listForms = new LinkedList<>();
-    ArrayAdapter<String> form_spinner_a;
+    SpinnerAdapter form_spinner_a;
     Spinner form_spinner;
 
     private Map<String, String> mapGroup = new LinkedHashMap<>();
     private List<String> listGroup = new LinkedList<>();
-    ArrayAdapter<String> group_spinner_a;
+    SpinnerAdapter group_spinner_a;
     Spinner group_spinner;
 
     private Map<String, String> mapCourse = new LinkedHashMap<>();
     private List<String> listCourse = new LinkedList<>();
-    ArrayAdapter<String> course_spinner_a;
+    SpinnerAdapter course_spinner_a;
     Spinner course_spinner;
 
     @Override
@@ -58,7 +58,7 @@ public class ScheduleChooseFragment extends Fragment {
                             (String) form_spinner.getSelectedItem() != "Выберите форму обучения" &&
                             (String) course_spinner.getSelectedItem() != "Выберите курс" &&
                             (String) group_spinner.getSelectedItem() != "Выберите группу") {
-                        HTML_SCHEDULE_PARSER test = new HTML_SCHEDULE_PARSER(getContext(),this);
+                        HTML_SCHEDULE_PARSER test = new HTML_SCHEDULE_PARSER(getContext(), this);
                         test.sendPost(mapFaculties.get((String) fuculties_spinner.getSelectedItem()),
                                 mapForms.get((String) form_spinner.getSelectedItem()),
                                 mapCourse.get((String) course_spinner.getSelectedItem()),
@@ -75,8 +75,9 @@ public class ScheduleChooseFragment extends Fragment {
     private void group_init(View view) {
         listGroup.add("Выберите группу");
         group_spinner = view.findViewById(R.id.group_spinner);
-        group_spinner_a = new ArrayAdapter<>(view.getContext(), android.R.layout.simple_spinner_item, listGroup);
-        group_spinner_a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        //group_spinner_a = new ArrayAdapter<>(view.getContext(), android.R.layout.simple_spinner_item, listGroup);
+        //group_spinner_a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        group_spinner_a = new SpinnerAdapter(view.getContext(), listGroup);
         group_spinner.setAdapter(group_spinner_a);
         group_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -93,8 +94,9 @@ public class ScheduleChooseFragment extends Fragment {
     private void course_init(View view) {
         listCourse.add("Выберите курс");
         course_spinner = view.findViewById(R.id.course_spinner);
-        course_spinner_a = new ArrayAdapter<>(view.getContext(), android.R.layout.simple_spinner_item, listCourse);
-        course_spinner_a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        //course_spinner_a = new ArrayAdapter<>(view.getContext(), android.R.layout.simple_spinner_item, listCourse);
+        //course_spinner_a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        course_spinner_a = new SpinnerAdapter(view.getContext(), listCourse);
         course_spinner.setAdapter(course_spinner_a);
         course_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -129,8 +131,9 @@ public class ScheduleChooseFragment extends Fragment {
     private void form_init(View view) {
         listForms.add("Выберите форму обучения");
         form_spinner = view.findViewById(R.id.form_spinner);
-        form_spinner_a = new ArrayAdapter<>(view.getContext(), android.R.layout.simple_spinner_item, listForms);
-        form_spinner_a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        //form_spinner_a = new ArrayAdapter<>(view.getContext(), android.R.layout.simple_spinner_item, listForms);
+        //form_spinner_a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        form_spinner_a = new SpinnerAdapter(view.getContext(), listForms);
         form_spinner.setAdapter(form_spinner_a);
         form_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -168,9 +171,8 @@ public class ScheduleChooseFragment extends Fragment {
     private void faculty_init(View view) {
         listFaculties.add("Выберите факультет");
         fuculties_spinner = view.findViewById(R.id.fuculties_spinner);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(view.getContext(), android.R.layout.simple_spinner_item, listFaculties);
-
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        fuculties_spinner.setAdapter(new SpinnerAdapter(view.getContext(), listFaculties));
+        SpinnerAdapter adapter = new SpinnerAdapter(view.getContext(), listFaculties);
         fuculties_spinner.setAdapter(adapter);
 
         fuculties_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

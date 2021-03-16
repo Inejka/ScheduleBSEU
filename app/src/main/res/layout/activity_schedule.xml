@@ -4,13 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/backgroundColor"
     tools:context=".ScheduleActivity">
 
     <Spinner
         android:id="@+id/spinner"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:background="@drawable/layout_bg"
         android:gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -28,6 +30,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/layout_bg"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -35,14 +38,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="ПН" />
+                android:text="ПН"
+                android:textColor="@color/textColor"
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/pnDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="test" />
+                android:text="test"
+                android:textColor="@color/textColor"
+                android:textSize="18sp" />
 
         </LinearLayout>
 
@@ -51,6 +58,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/layout_bg"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -58,14 +66,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="ВТ" />
+                android:text="ВТ"
+                android:textColor="@color/textColor"
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/vtDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="test" />
+                android:text="test"
+                android:textColor="@color/textColor"
+                android:textSize="18sp" />
 
         </LinearLayout>
 
@@ -74,6 +86,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/layout_bg"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -81,14 +94,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="СР" />
+                android:text="СР"
+                android:textColor="@color/textColor"
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/srDay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="test" />
+                android:text="test"
+                android:textColor="@color/textColor"
+                android:textSize="18sp" />
 
         </LinearLayout>
 
@@ -97,6 +114,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/layout_bg"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -104,14 +122,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="ЧТ" />
+                android:text="ЧТ"
+                android:textColor="@color/textColor"
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/chDay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="test" />
+                android:text="test"
+                android:textColor="@color/textColor"
+                android:textSize="18sp" />
 
         </LinearLayout>
 
@@ -120,6 +142,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/layout_bg"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -127,14 +150,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="ПТ" />
+                android:text="ПТ"
+                android:textColor="@color/textColor"
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/ptDay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="test" />
+                android:text="test"
+                android:textColor="@color/textColor"
+                android:textSize="18sp" />
 
         </LinearLayout>
 
@@ -143,6 +170,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/layout_bg"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -150,14 +178,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="СБ" />
+                android:text="СБ"
+                android:textColor="@color/textColor"
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/sbDay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="test" />
+                android:text="test"
+                android:textColor="@color/textColor"
+                android:textSize="18sp" />
 
         </LinearLayout>
 
@@ -166,9 +198,12 @@
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/pager"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
