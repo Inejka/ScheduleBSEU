@@ -30,7 +30,7 @@ public class Schedule implements Serializable {
     }
 
     public List<Week> weeks;
-    public int startWeek, weeksCount = 17;
+    public int startWeek, weeksCount ;
 
     public void createWeeks() {
         weeks = new ArrayList<>();

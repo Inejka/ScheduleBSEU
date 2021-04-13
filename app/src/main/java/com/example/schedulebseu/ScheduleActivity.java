@@ -95,8 +95,8 @@ public class ScheduleActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Calendar testC = new GregorianCalendar();
-                testC.add(Calendar.WEEK_OF_YEAR, -1 * mSchedule.startWeek);
-                testC.add(Calendar.WEEK_OF_YEAR, position + 1);
+                testC.set(Calendar.WEEK_OF_YEAR,mSchedule.startWeek+1);
+                testC.add(Calendar.WEEK_OF_YEAR, position );
                 testC.add(Calendar.DAY_OF_MONTH, -1 * mCalendar.get(Calendar.DAY_OF_WEEK) + 2);
                 for (int i = 0; i < 6; i++) {
                     vies.viesDate[i].setText(String.valueOf(testC.get(Calendar.DAY_OF_MONTH)));
