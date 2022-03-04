@@ -22,6 +22,7 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 
 public class Parser {
     //ToDo нормальынй парсер
@@ -35,7 +36,7 @@ public class Parser {
 
     public void parse(Context context, Fragment fragment) {
         Schedule toSave = new Schedule();
-
+        if(toParse.select("#sched > caption > span > strong:nth-child(1)").size()==0)toSave.startWeek=1; else
         toSave.startWeek = new GregorianCalendar().get(Calendar.WEEK_OF_YEAR) - Integer.parseInt
                 (toParse.select("#sched > caption > span > strong:nth-child(1)").get(0).text());
         Elements rows = toParse.select("#sched > tbody:nth-child(3)").get(0).getElementsByTag("tr");
@@ -52,7 +53,7 @@ public class Parser {
         }
         int day = 0;
         toSave.createWeeks();
-        Iterator<Element> rowsITERATOR = rows.iterator();
+        ListIterator<Element> rowsITERATOR = rows.listIterator();
         while (rowsITERATOR.hasNext()) {
             Element toWorkWith = rowsITERATOR.next();
             if (!isSubject(toWorkWith)) {
@@ -62,14 +63,14 @@ public class Parser {
             if (hasSubgroups(toWorkWith)) {
                 List<Element> freaks = new LinkedList<>();
                 Element toWork = rowsITERATOR.next();
-                while (hasSubgroups(toWork)) {
+                while (isSubgroup(toWork)) {
                     freaks.add(toWork);
+                    if (!rowsITERATOR.hasNext()) break;
                     toWork = rowsITERATOR.next();
-                    if (!isSubject(toWork)) break;
                 }
                 addSubWithSubGroups(toSave, toWorkWith, freaks, day);
-                if (isSubject(toWork))
-                    addNormakSub(toSave, toWork, day);
+                if (rowsITERATOR.hasNext()) rowsITERATOR.previous();
+
             } else {
                 addNormakSub(toSave, toWorkWith, day);
             }
@@ -77,6 +78,13 @@ public class Parser {
         save(toSave, context, fragment);
     }
 
+    private boolean isSubgroup(Element toCheck) {
+        int test = 0;
+        for (Element i : toCheck.getElementsByTag("td"))
+            test++;
+        if (test != 3) return false;
+        return toCheck.child(1).children().size() == 1;
+    }
 
     private void save(Schedule toSave, Context mcoContext, Fragment fragment) {
 
